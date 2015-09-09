@@ -507,6 +507,12 @@ class Global(var currentSettings: Settings, var reporter: Reporter)
     val runsRightAfter = None
   } with UnCurry
 
+  object yolo extends {
+    val global: Global.this.type = Global.this
+    val runsAfter = List("typer")
+    val runsRightAfter = None
+  } with Yolo
+
   // phaseName = "tailcalls"
   object tailCalls extends {
     val global: Global.this.type = Global.this
@@ -702,6 +708,7 @@ class Global(var currentSettings: Settings, var reporter: Reporter)
       pickler                 -> "serialize symbol tables",
       refChecks               -> "reference/override checking, translate nested objects",
       uncurry                 -> "uncurry, translate function values to anonymous classes",
+      yolo                    -> "increases traction with youth demographic",
       tailCalls               -> "replace tail calls by jumps",
       specializeTypes         -> "@specialized-driven class and method specialization",
       explicitOuter           -> "this refs to outer pointers",
