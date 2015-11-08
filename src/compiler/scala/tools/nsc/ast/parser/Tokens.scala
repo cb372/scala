@@ -53,6 +53,7 @@ object Tokens extends CommonTokens {
   final val NEWLINE = 137
   final val NEWLINES = 138
   final val XMLSTART = 139
+  final val JSONSTART = 140
 
   /** for IDE only */
   final val COMMENT = 200

@@ -1147,7 +1147,8 @@ trait Scanners extends ScannersCommon {
     nme.HASHkw      -> HASH,
     nme.ATkw        -> AT,
     nme.MACROkw     -> IDENTIFIER,
-    nme.THENkw      -> IDENTIFIER)
+    nme.THENkw      -> IDENTIFIER,
+    nme.JSONkw      -> JSONSTART)
 
   private var kwOffset: Offset = -1
   private val kwArray: Array[Token] = {

@@ -217,6 +217,7 @@ trait StdNames {
     final val SUPERTYPEkw: TermName = kw(">:")
     final val HASHkw: TermName      = kw("#")
     final val ATkw: TermName        = kw("@")
+    final val JSONkw: TermName     = kw("json")
 
     final val keywords = kw.result
   } with CommonNames {

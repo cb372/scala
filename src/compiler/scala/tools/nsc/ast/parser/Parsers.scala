@@ -128,7 +128,7 @@ trait ParsersCommon extends ScannersCommon { self =>
  *    </li>
  *  </ol>
  */
-trait Parsers extends Scanners with MarkupParsers with ParsersCommon {
+trait Parsers extends Scanners with MarkupParsers with ParsersCommon with JsonParsers {
 self =>
   val global: Global
   import global._
@@ -174,8 +174,11 @@ self =>
       new MarkupParser(this, preserveWS = true)
     }
 
+    private[this] val jsonp = new JsonParser(this)
+
     def xmlLiteral() : Tree = xmlp.xLiteral
     def xmlLiteralPattern() : Tree = xmlp.xLiteralPattern
+    def jsonLiteral() : Tree = jsonp.jLiteral
   }
 
   class OutlineParser(source: SourceFile) extends SourceFileParser(source) {
@@ -1343,6 +1346,7 @@ self =>
      *               | do Expr [semi] while `(' Expr `)'
      *               | for (`(' Enumerators `)' | `{' Enumerators `}') {nl} [yield] Expr
      *               | throw Expr
+     *               | json JsonLiteral
      *               | return [Expr]
      *               | [SimpleExpr `.'] Id `=' Expr
      *               | SimpleExpr1 ArgumentExprs `=' Expr
@@ -1449,6 +1453,10 @@ self =>
             Throw(expr())
           }
         parseThrow
+      case JSONSTART =>
+        atPos(in.skipToken()) {
+          jsonLiteral()
+        }
       case IMPLICIT =>
         implicitClosure(in.skipToken(), location)
       case _ =>
@@ -1575,6 +1583,7 @@ self =>
       else simpleExpr()
     }
     def xmlLiteral(): Tree
+    def jsonLiteral(): Tree
 
     /** {{{
      *  SimpleExpr    ::= new (ClassTemplate | TemplateBody)
