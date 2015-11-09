@@ -1454,9 +1454,7 @@ self =>
           }
         parseThrow
       case JSONSTART =>
-        atPos(in.skipToken()) {
-          jsonLiteral()
-        }
+        jsonLiteral()
       case IMPLICIT =>
         implicitClosure(in.skipToken(), location)
       case _ =>
