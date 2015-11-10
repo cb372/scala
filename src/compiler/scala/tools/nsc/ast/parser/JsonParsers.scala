@@ -25,11 +25,48 @@ trait JsonParsers {
     def jLiteral: Tree = {
       try {
         val jvalue = parse()
-        println(jvalue)
+        //println(jvalue)
         parser.in.nextToken() // move to the next token after the json literal
-        Literal(Constant("Some json"))
+        TreeBuilder.toTree(jvalue)
       } catch {
         case _: Throwable => parser.errorTermTree
+      }
+    }
+
+    object TreeBuilder {
+      private val _json: TermName = "json"
+      private val _math: TermName = "math"
+
+      private def _scala(name: TermName)            = Select(Select(Ident(nme.ROOTPKG), nme.scala_), name)
+      private def _scala_math(name: TermName)       = Select(_scala(_math), name)
+      private def _scala_json_ast(name: TermName)   = Select(Select(_scala(_json), "AST": TermName), name)
+      private val _list                             = _scala("List": TermName)
+      private val _bigdecimal                       = _scala_math("BigDecimal": TermName)
+      private val _bigint                           = _scala_math("BigInt": TermName)
+      private val _tuple2                           = _scala("Tuple2": TermName)
+
+      def toTree(jvalue: JValue): Tree = jvalue match {
+        case JNull => 
+          _scala_json_ast("JNull")
+        case JBool(value) => 
+          if (value)
+            Select(_scala_json_ast("JBool"), "True")
+          else
+            Select(_scala_json_ast("JBool"), "False")
+        case JString(value) => 
+          Apply(_scala_json_ast("JString"), List(Literal(Constant(value))))
+        case JDecimal(value) => 
+          Apply(_scala_json_ast("JDecimal"), List(Apply(_bigdecimal, List(Literal(Constant(value.toString))))))
+        case JInt(value) => 
+          Apply(_scala_json_ast("JInt"), List(Apply(_bigint, List(Literal(Constant(value.toString))))))
+        case JArray(elems) =>
+          val listOfElems = elems map toTree
+          Apply(_scala_json_ast("JArray"), List(Apply(_list, listOfElems)))
+        case JObject(fields) =>
+          val listOfFields = fields map { case (k, v) => 
+            Apply(_tuple2, List(Literal(Constant(k)), toTree(v)))
+          }
+          Apply(_scala_json_ast("JObject"), List(Apply(_list, listOfFields)))
       }
     }
 
