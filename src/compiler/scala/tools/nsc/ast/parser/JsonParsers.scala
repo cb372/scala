@@ -54,7 +54,10 @@ trait JsonParsers {
           else
             Select(_scala_json_ast("JBool"), "False")
         case JString(value) => 
-          Apply(_scala_json_ast("JString"), List(Literal(Constant(value))))
+          if (value.startsWith("IDENTIFIER::")) {
+            Ident(TermName(value.replaceFirst("IDENTIFIER::", "")))
+          } else
+            Apply(_scala_json_ast("JString"), List(Literal(Constant(value))))
         case JDecimal(value) => 
           Apply(_scala_json_ast("JDecimal"), List(Apply(_bigdecimal, List(Literal(Constant(value.toString))))))
         case JInt(value) => 
@@ -143,6 +146,8 @@ trait JsonParsers {
           handleValue(JBool.False, "true")
         case NULL =>
           handleValue(JNull, "null")
+        case IDENTIFIER | BACKQUOTED_IDENT =>
+          handleValue(JString(s"IDENTIFIER::${parser.in.name.encode.toString}"), "identifier")
         case COMMA | NEWLINE =>
           parse()
         case COLON =>
